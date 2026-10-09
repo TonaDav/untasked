@@ -17,6 +17,7 @@ DEBUG = os.getenv('DEBUG') == 'True'
 
 
 ALLOWED_HOSTS = []
+AUTH_USER_MODEL = 'users.Usuario'
 
 
 # Application definition
@@ -99,7 +100,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es-pe'
 
 TIME_ZONE = 'UTC'
 
@@ -107,13 +108,19 @@ USE_I18N = True
 
 USE_TZ = True
 
+# LOGIN LOGOUT URLS
+
+LOGIN_REDIRECT_URL = 'login'
+LOGOUT_REDIRECT_URL = 'logout'
+LOGIN_URL = 'login'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
 STATIC_URL = 'static/'
-
-
+STATICFILES_DIRS = [
+  BASE_DIR / 'static',
+]
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
 
