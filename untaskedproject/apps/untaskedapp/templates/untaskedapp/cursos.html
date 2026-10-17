@@ -1,0 +1,232 @@
+{% extends 'base.html' %}
+<!---->
+{% load static %}
+<!---->
+{% block title %}Tus cursos - Untasked{% endblock %}
+<!---->
+{% block extra_css %}
+<style>
+  /* Botón Principal */
+  .btn-purple {
+    background-color: var(--primary-purple);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-weight: 500;
+    transition: background-color 0.2s ease-in-out;
+  }
+
+  .btn-purple:hover,
+  .btn-purple:focus {
+    background-color: var(--primary-purple-hover);
+    color: #ffffff;
+  }
+
+  /* Tarjeta contenedora de lista */
+  .courses-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  }
+
+  /* Elemento individual de la lista */
+  .course-item {
+    padding: 18px 24px;
+    border-bottom: 1px solid #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: background-color 0.15s ease;
+  }
+
+  .course-item:last-child {
+    border-bottom: none;
+  }
+
+  .course-item:hover {
+    background-color: #fafafa;
+  }
+
+  .course-title {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #1f2937;
+    margin: 0;
+  }
+
+  /* Botón de eliminación */
+  .btn-delete-course {
+    color: #ef4444;
+    background: transparent;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition:
+      background-color 0.15s ease,
+      color 0.15s ease;
+  }
+
+  .btn-delete-course:hover {
+    background-color: #fee2e2;
+    color: #dc2626;
+  }
+
+  /* Estilos del Modal */
+  .modal-content-custom {
+    border-radius: 16px;
+    border: none;
+    padding: 28px;
+    box-shadow:
+      0 20px 25px -5px rgba(0, 0, 0, 0.1),
+      0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+
+  .btn-close-custom {
+    background-color: #f3f4f6;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    color: #4b5563;
+    font-size: 0.85rem;
+    transition: background-color 0.15s ease;
+  }
+
+  .btn-close-custom:hover {
+    background-color: #e5e7eb;
+  }
+
+  .form-control-custom {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.95rem;
+  }
+
+  .form-control-custom:focus {
+    border-color: var(--primary-purple);
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+  }
+</style>
+{% endblock %} {% block content %}
+<div class="container-fluid px-0" style="max-width: 960px">
+  <!-- ENCABEZADO: Título y Botón Agregar Curso -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 fw-bold text-dark mb-0">Tus cursos</h1>
+    <button
+      type="button"
+      class="btn btn-purple d-flex align-items-center gap-2"
+      data-bs-toggle="modal"
+      data-bs-target="#agregarCursoModal"
+    >
+      <i class="bi bi-plus-lg"></i>
+      <span>Agregar curso</span>
+    </button>
+  </div>
+
+  <!-- LISTA DE CURSOS -->
+  <div class="courses-card">
+    {% if cursos %}
+    <!---->
+    {% for curso in cursos %}
+    <div class="course-item">
+      <span class="course-title">{{ curso.nombre }}</span>
+
+      <!-- Formulario de Eliminación -->
+      <form action="#" method="post" class="m-0">
+        {% csrf_token %}
+        <button
+          type="submit"
+          class="btn-delete-course"
+          title="Eliminar curso"
+          onclick="
+            return confirm('¿Estás seguro de que deseas eliminar este curso?');
+          "
+        >
+          <i class="bi bi-trash3"></i>
+        </button>
+      </form>
+    </div>
+    {% endfor %}
+    <!---->
+    {% else %}
+    <!-- Estado Vacío -->
+    <div class="p-5 text-center text-muted">
+      <i class="bi bi-journal-bookmark fs-1 mb-2 d-block text-secondary"></i>
+      <p class="mb-0">¡Agrega tus cursos aquí!</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- MODAL: AGREGAR CURSO -->
+<div
+  class="modal fade"
+  id="agregarCursoModal"
+  tabindex="-1"
+  aria-labelledby="agregarCursoModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered" style="max-width: 440px">
+    <div class="modal-content modal-content-custom">
+      <!-- Cabecera del Modal -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5
+          class="modal-title fw-bold text-dark fs-5"
+          id="agregarCursoModalLabel"
+        >
+          Información del curso
+        </h5>
+        <button
+          type="button"
+          class="btn-close-custom"
+          data-bs-dismiss="modal"
+          aria-label="Cerrar"
+        >
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <!-- Cuerpo / Formulario -->
+      <form action="{% url 'crear_curso' %}" method="post">
+        {% csrf_token %}
+
+        <div class="mb-4">
+          <label
+            for="{{ form.nombre.id_for_label }}"
+            class="form-label text-secondary fw-medium small mb-2"
+            >Nombre</label
+          >
+          <input
+            type="text"
+            name="{{ form.nombre.name }}"
+            id="{{ form.nombre.id_for_label }}"
+            class="form-control form-control-custom"
+            placeholder=""
+            required
+          />
+          {% if form.nombre.errors %}
+          <div class="text-danger small mt-1">
+            {{ form.nombre.errors|striptags }}
+          </div>
+          {% endif %}
+        </div>
+
+        <button
+          type="submit"
+          class="btn btn-purple w-100 py-2 d-flex align-items-center justify-content-center gap-2"
+        >
+          <i class="bi bi-plus-lg"></i>
+          <span>Agregar curso</span>
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -4,7 +4,7 @@ from django.contrib.auth.models import BaseUserManager, AbstractUser
 class UsuarioManager(BaseUserManager):
 
   # Nos permite crear usuarios comunes.
-  def create_user(self, email, username, password, **extra_fields):
+  def create_user(self, email, username, password=None, **extra_fields):
     # Verificamos que el email exista.
     if not email:
       raise ValueError('El correo electrónico es obligatorio.')
@@ -24,16 +24,16 @@ class UsuarioManager(BaseUserManager):
     return user
 
   # Nos permite crear superusuarios.
-  def create_superuser(self, email, username, password, **extra_fields):
+  def create_superuser(self, email, username, password=None, **extra_fields):
     # Verificamos que los campos sean verdaderos.
     extra_fields.setdefault('is_staff', True)
     extra_fields.setdefault('is_active', True)
     extra_fields.setdefault('is_superuser', True)
 
     # Verificamos.
-    if extra_fields.get('is_staff') is False:
+    if extra_fields.get('is_staff') is not True:
       raise ValueError("El superusuario debe ser is_staff.")
-    if extra_fields.get('is_superuser') is False:
+    if extra_fields.get('is_superuser') is not True:
       raise ValueError('El superusuario debe ser is_superuser.')
 
     return self.create_user(email, username, password, **extra_fields)
