@@ -10,12 +10,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Colocamos nuestra configuración de seguridad
 SECRET_KEY = os.getenv('SECRET_KEY')
-DEBUG = os.getenv('DEBUG') == 'False'
+DEBUG = os.getenv('DEBUG') == 'True'
+#DEBUG = os.getenv('DEBUG') == 'False'
 
-
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+ALLOWED_HOSTS = []
+# ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 AUTH_USER_MODEL = 'users.Usuario'
-
 
 # Application definition
 
@@ -107,7 +107,7 @@ USE_TZ = True
 
 # LOGIN LOGOUT URLS
 
-LOGIN_REDIRECT_URL = 'mis_cursos'
+LOGIN_REDIRECT_URL = 'mis_tareas'
 LOGOUT_REDIRECT_URL = 'login'
 LOGIN_URL = 'login'
 

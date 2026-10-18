@@ -3,10 +3,11 @@ from .models import Curso, Tarea
 from django.db import transaction
 from django.contrib import messages
 from django.urls import reverse_lazy
+from django.views.generic import ListView, CreateView
 from django.shortcuts import redirect, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .forms import CursoForm, TareaForm, SubtareaCreateFormset
-from django.views.generic import ListView, CreateView
+    
 
 class CursoListView(LoginRequiredMixin, ListView):
   model = Curso
@@ -28,6 +29,7 @@ class CursoListView(LoginRequiredMixin, ListView):
 class CursoCreateView(LoginRequiredMixin, CreateView):
   model = Curso
   form_class = CursoForm
+  template_name = 'untaskedapp/cursos.html'
   success_url = reverse_lazy('mis_cursos')
 
   # form_valid() se ejecuta después de que todos los datos ingresados
@@ -40,6 +42,13 @@ class CursoCreateView(LoginRequiredMixin, CreateView):
     # Aquí le asignamos un usuario (el que está logueado), pues no puede haber un curso sin usuario.
     form.instance.usuario = usuario
     return super().form_valid(form)
+
+  def form_invalid(self, form):
+    # Recuperamos los cursos del usuario para que la lista del fondo no se borre.
+    cursos = Curso.objects.filter(usuario=self.request.user)
+    return self.render_to_response(
+        self.get_context_data(form=form, object_list=cursos)
+    )
 
 class CursoDeleteView(LoginRequiredMixin, View):
   def post(self, request, pk):
