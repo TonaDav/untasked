@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+<!---->
+{% block title %}Página no encontrada - Untasked{% endblock %}
+<!---->
+{% block content %}
+<div class="container text-center py-5" style="max-width: 600px">
+  <div class="py-4">
+    <i class="bi bi-exclamation-circle text-purple display-1 mb-3 d-block"></i>
+    <h1 class="fw-bold text-dark mb-2">404 - Página no encontrada</h1>
+    <p class="text-muted mb-4">
+      La página o el número de listado que intentas buscar no existe o fue
+      movido.
+    </p>
+    <a href="{% url 'mis_tareas' %}" class="btn btn-purple px-4 py-2">
+      Volver a Mis Tareas
+    </a>
+  </div>
+</div>
+{% endblock %}

@@ -25,7 +25,7 @@ class Tarea(models.Model):
     ('URGENTE', 'Urgente'),
   ]
 
-  curso = models.ForeignKey(Curso, on_delete=models.CASCADE, related_name='tareas')
+  curso = models.ForeignKey(Curso, on_delete=models.PROTECT, related_name='tareas')
   descripcion = models.CharField(max_length=50)
   fecha_limite = models.DateField(validators=[validate_fecha_limite])
   prioridad = models.CharField(choices=PRIORIDADES, max_length=8, default='BAJA')

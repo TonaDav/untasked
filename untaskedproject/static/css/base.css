@@ -3,7 +3,7 @@
   --primary-purple-hover: #6d28d9;
   --light-purple-bg: #f5f3ff;
   --active-purple: #7c3aed;
-  --sidebar-bg: #f8f9fa;
+  --sidebar-bg: #ffffff;
   --text-muted: #6c757d;
 }
 
@@ -25,6 +25,9 @@ body {
 .top-header {
   background-color: var(--primary-purple);
   height: 64px;
+  position: sticky;
+  top: 0;
+  z-index: 1030;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -50,12 +53,14 @@ body {
   background-color: rgba(255, 255, 255, 0.25);
 }
 
-/* Sidebar */
+/* Sidebar Fija (Sticky) */
 .sidebar {
   width: 240px;
-  background-color: #ffffff;
+  height: calc(100vh - 64px);
+  position: sticky;
+  top: 64px;
+  background-color: var(--sidebar-bg);
   border-right: 1px solid #e5e7eb;
-  min-height: calc(100vh - 64px);
 }
 
 .nav-link-custom {
@@ -79,13 +84,13 @@ body {
   font-weight: 600;
 }
 
-/* Botón de Cerrar Sesión con Hover */
+/* Botón de Cerrar Sesión */
 .btn-logout {
   color: var(--text-muted);
   background: transparent;
   border: none;
   border-radius: 8px;
-  padding: 8px 12px;
+  padding: 10px 12px;
   font-weight: 500;
   font-size: 0.9rem;
   transition: all 0.2s ease;
@@ -97,5 +102,18 @@ body {
 .btn-logout:hover {
   color: #ef4444;
   background-color: #fee2e2;
-  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.08);
+}
+
+/* Estilos globales para la paginación limpia */
+.pagination .page-link {
+  border-radius: 8px !important;
+  color: var(--primary-purple);
+  border: 1px solid #e5e7eb;
+  padding: 6px 14px;
+  background-color: #ffffff;
+}
+
+.pagination .page-link:hover {
+  background-color: #f3f4f6;
+  color: var(--primary-purple-hover);
 }

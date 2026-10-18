@@ -169,6 +169,12 @@ class SubtareaForm(forms.ModelForm):
       })
     }
 
+  def __init__(self, *args, **kwargs):
+    super().__init__(*args, **kwargs)
+    # Hacemos el que campo nombre pueda estar vacío
+    # para que el formset ignore ese formulario específico.
+    self.fields['descripcion'].required = False
+
 # Utilizamos Formsets cuando queremos crear múltiples instancias
 # del mismo formulario dentro de una misma página HTML.
 # inlineformset_factory es utilizado cuando tenemos una relación padre-hijo.
@@ -179,12 +185,4 @@ SubtareaCreateFormset = inlineformset_factory(
   form=SubtareaForm,
   extra=3, # Número de formularios que tenemos inicialmente
   can_delete=False # No se pueden eliminar subtareas.
-)
-
-SubtareaUpdateFormset = inlineformset_factory(
-  parent_model=Tarea,
-  model=Subtarea,
-  form=SubtareaForm,
-  extra=3,
-  can_delete=True
 )

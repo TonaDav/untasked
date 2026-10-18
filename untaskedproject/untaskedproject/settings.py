@@ -10,10 +10,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Colocamos nuestra configuración de seguridad
 SECRET_KEY = os.getenv('SECRET_KEY')
-DEBUG = os.getenv('DEBUG') == 'True'
+DEBUG = os.getenv('DEBUG') == 'False'
 
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 AUTH_USER_MODEL = 'users.Usuario'
 
 
@@ -108,7 +108,7 @@ USE_TZ = True
 # LOGIN LOGOUT URLS
 
 LOGIN_REDIRECT_URL = 'mis_cursos'
-LOGOUT_REDIRECT_URL = 'logout'
+LOGOUT_REDIRECT_URL = 'login'
 LOGIN_URL = 'login'
 
 # Static files (CSS, JavaScript, Images)

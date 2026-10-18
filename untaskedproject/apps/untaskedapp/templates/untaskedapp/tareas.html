@@ -1,0 +1,792 @@
+{% extends 'base.html' %}
+<!---->
+{% load static %}
+<!---->
+{% block title %}Tus tareas - Untasked{% endblock %}
+<!---->
+{% block extra_css %}
+<style>
+  /* Botón Principal Púrpura */
+  .btn-purple {
+    background-color: var(--primary-purple);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 20px;
+    font-weight: 500;
+    transition: background-color 0.2s ease-in-out;
+  }
+
+  .btn-purple:hover,
+  .btn-purple:focus {
+    background-color: var(--primary-purple-hover);
+    color: #ffffff;
+  }
+
+  /* Botón secundario "Filtrar por" */
+  .btn-outline-custom {
+    background-color: #ffffff;
+    color: #6b7280;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+  }
+
+  .btn-outline-custom:hover {
+    border-color: var(--primary-purple);
+    color: var(--primary-purple);
+    background-color: #f9fafb;
+  }
+
+  /* Tarjeta contenedora de la Tabla */
+  .tasks-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  }
+
+  .table-custom {
+    margin-bottom: 0;
+    vertical-align: middle;
+  }
+
+  .table-custom th {
+    background-color: #fafafa;
+    color: #6b7280;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 16px 24px;
+    border-bottom: 1px solid #f3f4f6;
+  }
+
+  .table-custom td {
+    padding: 18px 24px;
+    color: #374151;
+    font-size: 0.92rem;
+    border-bottom: 1px solid #f3f4f6;
+  }
+
+  .table-custom tr:last-child td {
+    border-bottom: none;
+  }
+
+  .table-custom tr.task-row-clickable {
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+  }
+
+  .table-custom tr.task-row-clickable:hover td {
+    background-color: #fcfaff;
+  }
+
+  /* Icono Check Verde */
+  .check-icon-circle {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1.5px solid #10b981;
+    color: #10b981;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    margin-right: 12px;
+    background-color: rgba(16, 185, 129, 0.05);
+    flex-shrink: 0;
+  }
+
+  /* Badges de Prioridad */
+  .badge-priority {
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    display: inline-block;
+    text-align: center;
+  }
+
+  .badge-priority-alta,
+  .badge-priority-urgente {
+    background-color: #fde8e8;
+    color: #e02424;
+  }
+
+  .badge-priority-media {
+    background-color: #fef3c7;
+    color: #d97706;
+  }
+
+  .badge-priority-baja {
+    background-color: #e1fcd3;
+    color: #057a55;
+  }
+
+  /* Botón de eliminación */
+  .btn-delete-task {
+    color: #ef4444;
+    background: transparent;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition:
+      background-color 0.15s ease,
+      color 0.15s ease;
+  }
+
+  .btn-delete-task:hover {
+    background-color: #fee2e2;
+    color: #dc2626;
+  }
+
+  /* Estilos para Modales */
+  .modal-dialog-custom {
+    max-width: 480px;
+    margin-top: 1.75rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .modal-content-custom {
+    border-radius: 20px;
+    border: none;
+    padding: 24px;
+    max-height: calc(100vh - 3.5rem);
+    display: flex;
+    flex-direction: column;
+    box-shadow:
+      0 20px 25px -5px rgba(0, 0, 0, 0.1),
+      0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+
+  .modal-body-scrollable {
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+
+  .modal-body-scrollable::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .modal-body-scrollable::-webkit-scrollbar-thumb {
+    background-color: #d1d5db;
+    border-radius: 4px;
+  }
+
+  .btn-close-custom {
+    background-color: #f3f4f6;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    color: #4b5563;
+    font-size: 0.85rem;
+    transition: background-color 0.15s ease;
+  }
+
+  .btn-close-custom:hover {
+    background-color: #e5e7eb;
+  }
+
+  .form-control-custom,
+  .form-select-custom {
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 0.95rem;
+    color: #1f2937;
+    width: 100%;
+  }
+
+  .form-control-custom:focus,
+  .form-select-custom:focus {
+    border-color: var(--primary-purple);
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+    outline: none;
+  }
+
+  .subtask-input {
+    background-color: #ffffff;
+  }
+
+  /* Color para la opción activa del menú desplegable */
+  .dropdown-menu .dropdown-item.active,
+  .dropdown-menu .dropdown-item:active {
+    background-color: var(--primary-purple) !important;
+    color: #ffffff !important;
+  }
+
+  /* Color para el texto "Mostrar todas" */
+  .text-purple {
+    color: var(--primary-purple) !important;
+  }
+</style>
+{% endblock %} {% block content %}
+<div class="container-fluid px-0" style="max-width: 1080px">
+  <!-- ENCABEZADO: Título, Filtro "Filtrar por" y Botón "Agregar tarea" -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 fw-bold text-dark mb-0">Tus tareas</h1>
+
+    <div class="d-flex align-items-center gap-3">
+      <!-- Menú Desplegable Filtrar por -->
+      <div class="dropdown">
+        <button
+          class="btn btn-outline-custom dropdown-toggle d-flex align-items-center gap-2"
+          type="button"
+          id="dropdownFilter"
+          data-bs-toggle="dropdown"
+          aria-expanded="false"
+        >
+          <i class="bi bi-funnel"></i>
+          <span>
+            {% if filtro_actual == 'prioridad' %}
+            <!---->
+            Prioridad: {{ valor_actual|title }}
+            <!---->
+            {% elif filtro_actual == 'curso' %}
+            <!---->
+            Filtrado por curso
+            <!---->
+            {% else %} Filtrar por {% endif %}
+          </span>
+        </button>
+        <ul
+          class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-1"
+          aria-labelledby="dropdownFilter"
+          style="min-width: 200px"
+        >
+          {% if filtro_actual %}
+          <li>
+            <a
+              class="dropdown-item py-2 text-purple fw-medium"
+              href="{% url 'mis_tareas' %}"
+            >
+              <i class="bi bi-x-circle me-1"></i> Mostrar todas
+            </a>
+          </li>
+          <li><hr class="dropdown-divider my-1" /></li>
+          {% endif %}
+
+          <!-- Sección Prioridad -->
+          <li>
+            <h6 class="dropdown-header text-uppercase fs-xs fw-bold text-muted">
+              Por Prioridad
+            </h6>
+          </li>
+          {% for val, label in prioridades_list %}
+          <li>
+            <a
+              class="dropdown-item py-1 ps-3 small {% if filtro_actual == 'prioridad' and valor_actual == val %}active{% endif %}"
+              href="?filtro=prioridad&valor={{ val }}"
+            >
+              {{ label }}
+            </a>
+          </li>
+          {% endfor %}
+
+          <li><hr class="dropdown-divider my-1" /></li>
+
+          <!-- Sección Curso -->
+          <li>
+            <h6 class="dropdown-header text-uppercase fs-xs fw-bold text-muted">
+              Por Curso
+            </h6>
+          </li>
+          {% for curso_item in cursos_usuario %}
+          <li>
+            <a
+              class="dropdown-item py-1 ps-3 small {% if filtro_actual == 'curso' and valor_actual|add:'0' == curso_item.id %}active{% endif %}"
+              href="?filtro=curso&valor={{ curso_item.id }}"
+            >
+              {{ curso_item.nombre }}
+            </a>
+          </li>
+          {% empty %}
+          <li>
+            <span class="dropdown-item py-1 ps-3 small text-muted fst-italic"
+              >Sin cursos creados</span
+            >
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <!-- Botón Agregar Tarea -->
+      <button
+        type="button"
+        class="btn btn-purple d-flex align-items-center gap-2"
+        data-bs-toggle="modal"
+        data-bs-target="#agregarTareaModal"
+      >
+        <i class="bi bi-plus-lg"></i>
+        <span>Agregar tarea</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- TABLA DE TAREAS (Única tarjeta contenedora) -->
+  <div class="tasks-card">
+    {% if tareas %}
+    <div class="table-responsive">
+      <table class="table table-custom align-middle mb-0">
+        <thead>
+          <tr>
+            <th scope="col" style="width: 35%">TAREA</th>
+            <th scope="col" style="width: 25%">CURSO</th>
+            <th scope="col" style="width: 20%">FECHA LÍMITE</th>
+            <th scope="col" style="width: 12%">PRIORIDAD</th>
+            <th scope="col" style="width: 8%; text-align: right"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for tarea in tareas %}
+          <tr
+            class="task-row-clickable"
+            data-titulo="{{ tarea.descripcion }}"
+            data-curso="{{ tarea.curso.nombre|default:'Sin curso' }}"
+            data-fecha="{{ tarea.fecha_limite|date:'d/m/Y' }}"
+            data-prioridad="{{ tarea.get_prioridad_display|default:tarea.prioridad }}"
+            data-subtareas='[
+              {% for sub in tarea.subtareas.all %}
+                {"descripcion": "{{ sub.descripcion|escapejs }}", "completada": {{ sub.is_completada|lower }}}{% if not forloop.last %},{% endif %}
+              {% endfor %}
+            ]'
+          >
+            <!-- Nombre Tarea con Check -->
+            <td>
+              <div class="d-flex align-items-center">
+                <span class="check-icon-circle">
+                  <i class="bi bi-check-lg"></i>
+                </span>
+                <span class="fw-medium text-dark">{{ tarea.descripcion }}</span>
+              </div>
+            </td>
+
+            <!-- Nombre del Curso -->
+            <td class="text-secondary">
+              {{ tarea.curso.nombre|default:"Sin curso" }}
+            </td>
+
+            <!-- Fecha Límite -->
+            <td class="text-secondary">
+              {{ tarea.fecha_limite|date:"d/m/Y" }}
+            </td>
+
+            <!-- Prioridad (Badge) -->
+            <td>
+              {% with prio=tarea.prioridad|lower %}
+              <span class="badge-priority badge-priority-{{ prio }}">
+                {{ tarea.get_prioridad_display|default:tarea.prioridad|title }}
+              </span>
+              {% endwith %}
+            </td>
+
+            <!-- Acción Eliminar -->
+            <td class="text-end">
+              <form
+                action="{% url 'eliminar_tarea' tarea.id %}"
+                method="post"
+                class="m-0 d-inline"
+              >
+                {% csrf_token %}
+                <button
+                  type="submit"
+                  class="btn-delete-task"
+                  title="Eliminar tarea"
+                >
+                  <i class="bi bi-trash3"></i>
+                </button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <!-- Estado Vacío Dinámico -->
+    <div class="p-5 text-center text-muted">
+      <i class="bi bi-search fs-1 mb-2 d-block text-secondary"></i>
+      {% if filtro_actual == 'prioridad' %}
+      <p class="mb-2 fw-medium text-dark">
+        No se encontraron tareas con esta prioridad.
+      </p>
+      <a href="{% url 'mis_tareas' %}" class="btn btn-sm btn-outline-secondary"
+        >Ver todas las tareas</a
+      >
+      {% elif filtro_actual == 'curso' %}
+      <p class="mb-2 fw-medium text-dark">
+        No se encontraron tareas con este curso.
+      </p>
+      <a href="{% url 'mis_tareas' %}" class="btn btn-sm btn-outline-secondary"
+        >Ver todas las tareas</a
+      >
+      {% else %}
+      <p class="mb-0">¡Agrega tus tareas aquí!</p>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+  <!-- Fin de tasks-card -->
+
+  <!-- PAGINACIÓN DE TAREAS (Separada fuera de la tarjeta blanca) -->
+  {% if is_paginated %}
+  <nav class="my-4 d-flex justify-content-center">
+    <ul class="pagination pagination-sm gap-2 mb-0">
+      {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a
+          class="page-link shadow-sm"
+          href="?page={{ page_obj.previous_page_number }}{% if filtro_actual %}&filtro={{ filtro_actual }}&valor={{ valor_actual }}{% endif %}"
+          >Anterior</a
+        >
+      </li>
+      {% endif %}
+
+      <li class="page-item disabled">
+        <span class="page-link text-dark fw-medium border-0 shadow-sm">
+          Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+        </span>
+      </li>
+
+      {% if page_obj.has_next %}
+      <li class="page-item">
+        <a
+          class="page-link shadow-sm"
+          href="?page={{ page_obj.next_page_number }}{% if filtro_actual %}&filtro={{ filtro_actual }}&valor={{ valor_actual }}{% endif %}"
+          >Siguiente</a
+        >
+      </li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+</div>
+
+<!-- MODAL 1: DETALLE DE LA TAREA -->
+<div
+  class="modal fade"
+  id="detalleTareaModal"
+  tabindex="-1"
+  aria-labelledby="detalleTareaModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered modal-dialog-custom">
+    <div class="modal-content modal-content-custom">
+      <!-- Cabecera del Modal -->
+      <div class="d-flex justify-content-between align-items-start mb-2">
+        <h4 class="fw-bold text-dark mb-0 fs-4" id="modalDetalleTitulo">
+          Tarea
+        </h4>
+        <button
+          type="button"
+          class="btn-close-custom"
+          data-bs-dismiss="modal"
+          aria-label="Cerrar"
+        >
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <!-- Línea divisoria púrpura -->
+      <hr
+        style="border-top: 2px solid var(--primary-purple); opacity: 0.8"
+        class="my-2"
+      />
+
+      <!-- Metadatos (Texto púrpura/azul suave) -->
+      <div
+        class="mb-3"
+        style="color: #6366f1; font-weight: 500; font-size: 0.93rem"
+      >
+        <div class="mb-1">
+          Fecha límite:
+          <span id="modalDetalleFecha" class="fw-normal text-dark"></span>
+        </div>
+        <div class="mb-1">
+          Prioridad:
+          <span id="modalDetallePrioridad" class="fw-normal text-dark"></span>
+        </div>
+        <div class="mb-1">
+          Curso:
+          <span id="modalDetalleCurso" class="fw-normal text-dark"></span>
+        </div>
+      </div>
+
+      <!-- Sección Subtareas -->
+      <h6 class="fw-bold text-dark mb-2 fs-6">Subtareas</h6>
+
+      <!-- Contenedor de Subtareas -->
+      <div
+        id="modalDetalleSubtareasContainer"
+        class="modal-body-scrollable"
+        style="max-height: 180px"
+      >
+        <!-- Se rellena dinámicamente con JavaScript -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL 2: AGREGAR TAREA CON SUBTAREAS -->
+<div
+  class="modal fade"
+  id="agregarTareaModal"
+  tabindex="-1"
+  aria-labelledby="agregarTareaModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered modal-dialog-custom">
+    <div class="modal-content modal-content-custom">
+      <!-- Cabecera del Modal -->
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5
+          class="modal-title fw-bold text-dark fs-5"
+          id="agregarTareaModalLabel"
+        >
+          Información de la tarea
+        </h5>
+        <button
+          type="button"
+          class="btn-close-custom"
+          data-bs-dismiss="modal"
+          aria-label="Cerrar"
+        >
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <!-- Formulario -->
+      <form
+        action="{% url 'crear_tarea' %}"
+        method="post"
+        class="d-flex flex-column"
+        style="min-height: 0"
+      >
+        {% csrf_token %}
+
+        <!-- Mensajes de Error de Validación -->
+        {% if form.errors or subtarea_formset.errors %}
+        <div class="alert alert-danger p-2 mb-3 small">
+          <strong>Por favor corrige los siguientes errores:</strong>
+          <ul class="mb-0 ps-3">
+            {% for field, errors in form.errors.items %}
+            <!---->
+            {% for error in errors %}
+            <li>{{ field|title }}: {{ error }}</li>
+            {% endfor %}
+            <!---->
+            {% endfor %}
+            <!---->
+            {% for sub_form in subtarea_formset %}
+            <!---->
+            {% for field, errors in sub_form.errors.items %}
+            <!---->
+            {% for error in errors %}
+            <li>Subtarea: {{ error }}</li>
+            {% endfor %}
+            <!---->
+            {% endfor %}
+            <!---->
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+
+        <!-- Campos ocultos de control del Formset -->
+        {{ subtarea_formset.management_form }}
+
+        <!-- Área scrolleable interna para los campos del formulario -->
+        <div class="modal-body-scrollable pe-1">
+          <!-- Nombre (Descripción) de la tarea -->
+          <div class="mb-2">
+            <label
+              for="id_descripcion"
+              class="form-label text-secondary fw-medium small mb-1"
+              >Nombre</label
+            >
+            <input
+              type="text"
+              name="descripcion"
+              id="id_descripcion"
+              class="form-control form-control-custom"
+              value="{{ form.descripcion.value|default:'' }}"
+              required
+            />
+          </div>
+
+          <!-- Curso -->
+          <div class="mb-2">
+            <label
+              for="id_curso"
+              class="form-label text-secondary fw-medium small mb-1"
+              >Curso</label
+            >
+            <select
+              name="curso"
+              id="id_curso"
+              class="form-select form-select-custom"
+              required
+            >
+              <option value="" selected disabled>Selecciona un curso</option>
+              {% for choice_val, choice_label in form.fields.curso.choices %}
+              <!---->
+              {% if choice_val %}
+              <option value="{{ choice_val }}">{{ choice_label }}</option>
+              {% endif %}
+              <!---->
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Fecha Límite -->
+          <div class="mb-2">
+            <label
+              for="id_fecha_limite"
+              class="form-label text-secondary fw-medium small mb-1"
+              >Fecha límite</label
+            >
+            <input
+              type="date"
+              name="fecha_limite"
+              id="id_fecha_limite"
+              class="form-control form-control-custom"
+              value="{{ form.fecha_limite.value|date:'Y-m-d'|default:'' }}"
+              required
+            />
+          </div>
+
+          <!-- Prioridad -->
+          <div class="mb-2">
+            <label
+              for="id_prioridad"
+              class="form-label text-secondary fw-medium small mb-1"
+              >Prioridad</label
+            >
+            <select
+              name="prioridad"
+              id="id_prioridad"
+              class="form-select form-select-custom"
+              required
+            >
+              <option value="BAJA" selected>Baja</option>
+              <option value="MEDIA">Media</option>
+              <option value="ALTA">Alta</option>
+              <option value="URGENTE">Urgente</option>
+            </select>
+          </div>
+
+          <!-- Subtareas -->
+          <div class="mb-3">
+            <label class="form-label text-secondary fw-medium small mb-1"
+              >Subtareas</label
+            >
+            <div class="d-flex flex-column gap-2">
+              {% for sub_form in subtarea_formset %}
+              <div class="subtask-row">
+                {{ sub_form.id }} {{ sub_form.descripcion }}
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Botón Enviar -->
+        <div class="pt-3">
+          <button
+            type="submit"
+            class="btn btn-purple w-100 py-2 d-flex align-items-center justify-content-center gap-2"
+          >
+            <i class="bi bi-plus-lg"></i>
+            <span>Agregar tarea</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- SCRIPTS JAVASCRIPT -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // 1. Manejo del clic en las filas para abrir el modal de detalle
+    var tableBody = document.querySelector(".table-custom tbody");
+    var detalleModalElement = document.getElementById("detalleTareaModal");
+
+    if (tableBody && detalleModalElement) {
+      var detalleModal = new bootstrap.Modal(detalleModalElement);
+
+      tableBody.addEventListener("click", function (event) {
+        if (
+          event.target.closest(".btn-delete-task") ||
+          event.target.closest("form")
+        ) {
+          return;
+        }
+
+        var row = event.target.closest(".task-row-clickable");
+        if (!row) return;
+
+        var titulo = row.getAttribute("data-titulo");
+        var curso = row.getAttribute("data-curso");
+        var fecha = row.getAttribute("data-fecha");
+        var prioridad = row.getAttribute("data-prioridad");
+        var subtareas = JSON.parse(row.getAttribute("data-subtareas") || "[]");
+
+        document.getElementById("modalDetalleTitulo").textContent = titulo;
+        document.getElementById("modalDetalleCurso").textContent = curso;
+        document.getElementById("modalDetalleFecha").textContent = fecha;
+        document.getElementById("modalDetallePrioridad").textContent =
+          prioridad;
+
+        var subContainer = document.getElementById(
+          "modalDetalleSubtareasContainer",
+        );
+        subContainer.innerHTML = "";
+
+        if (subtareas.length > 0) {
+          var ul = document.createElement("ul");
+          ul.className = "list-unstyled mb-0 d-flex flex-column gap-2";
+
+          subtareas.forEach(function (sub) {
+            var li = document.createElement("li");
+            li.className =
+              "d-flex align-items-center gap-2 text-secondary small";
+            li.innerHTML = `
+              <i class="bi ${sub.completada ? "bi-check-circle-fill text-success" : "bi-circle text-muted"}"></i>
+              <span class="${sub.completada ? "text-decoration-line-through text-muted" : ""}">${sub.descripcion}</span>
+            `;
+            ul.appendChild(li);
+          });
+
+          subContainer.appendChild(ul);
+        } else {
+          subContainer.innerHTML = `<p class="text-muted small fst-italic my-2">Sin subtareas</p>`;
+        }
+
+        detalleModal.show();
+      });
+    }
+  });
+</script>
+
+<!-- 2. Reabrir automáticamente el modal de creación si ocurren errores de validación -->
+{% if form.errors or subtarea_formset.errors %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    var agregarModalElement = document.getElementById("agregarTareaModal");
+    if (agregarModalElement) {
+      var modal = new bootstrap.Modal(agregarModalElement);
+      modal.show();
+    }
+  });
+</script>
+{% endif %} {% endblock %}

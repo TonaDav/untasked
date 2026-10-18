@@ -23,27 +23,38 @@
     color: #ffffff;
   }
 
-  /* Tarjeta contenedora de lista */
   .courses-card {
     background: #ffffff;
     border: 1px solid #e5e7eb;
-    border-radius: 12px;
+    border-radius: 16px;
     overflow: hidden;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
   }
 
-  /* Elemento individual de la lista */
   .course-item {
-    padding: 18px 24px;
-    border-bottom: 1px solid #f3f4f6;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    transition: background-color 0.15s ease;
+    padding: 18px 24px;
+    border-bottom: 1px solid #f3f4f6;
+    margin-bottom: 0 !important; /* Evita rellenos no deseados al final */
   }
 
   .course-item:last-child {
-    border-bottom: none;
+    border-bottom: none !important; /* Elimina la línea inferior del último elemento */
+  }
+
+  /* Estilos limpios para los botones de paginación */
+  .pagination .page-link {
+    border-radius: 8px !important;
+    color: var(--primary-purple, #7c3aed);
+    border: 1px solid #e5e7eb;
+    padding: 6px 14px;
+  }
+
+  .pagination .page-link:hover {
+    background-color: #f3f4f6;
+    color: var(--primary-purple-hover, #6d28d9);
   }
 
   .course-item:hover {
@@ -116,6 +127,31 @@
 </style>
 {% endblock %} {% block content %}
 <div class="container-fluid px-0" style="max-width: 960px">
+  {% if messages %}
+  <div class="mb-4">
+    {% for message in messages %}
+    <div
+      class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show border-0 shadow-sm"
+      role="alert"
+    >
+      <div class="d-flex align-items-center gap-2">
+        {% if message.tags == 'error' %}
+        <i class="bi bi-exclamation-triangle-fill text-danger fs-5"></i>
+        {% else %}
+        <i class="bi bi-check-circle-fill text-success fs-5"></i>
+        {% endif %}
+        <span>{{ message }}</span>
+      </div>
+      <button
+        type="button"
+        class="btn-close"
+        data-bs-dismiss="alert"
+        aria-label="Cerrar"
+      ></button>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
   <!-- ENCABEZADO: Título y Botón Agregar Curso -->
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="h3 fw-bold text-dark mb-0">Tus cursos</h1>
@@ -132,30 +168,23 @@
 
   <!-- LISTA DE CURSOS -->
   <div class="courses-card">
-    {% if cursos %}
-    <!---->
-    {% for curso in cursos %}
+    {% if cursos %} {% for curso in cursos %}
     <div class="course-item">
       <span class="course-title">{{ curso.nombre }}</span>
 
       <!-- Formulario de Eliminación -->
-      <form action="#" method="post" class="m-0">
+      <form
+        action="{% url 'eliminar_curso' curso.id %}"
+        method="post"
+        class="m-0"
+      >
         {% csrf_token %}
-        <button
-          type="submit"
-          class="btn-delete-course"
-          title="Eliminar curso"
-          onclick="
-            return confirm('¿Estás seguro de que deseas eliminar este curso?');
-          "
-        >
+        <button type="submit" class="btn-delete-course" title="Eliminar curso">
           <i class="bi bi-trash3"></i>
         </button>
       </form>
     </div>
-    {% endfor %}
-    <!---->
-    {% else %}
+    {% endfor %} {% else %}
     <!-- Estado Vacío -->
     <div class="p-5 text-center text-muted">
       <i class="bi bi-journal-bookmark fs-1 mb-2 d-block text-secondary"></i>
@@ -163,6 +192,40 @@
     </div>
     {% endif %}
   </div>
+  <!-- 👈 AQUÍ TERMINA LA TARJETA BLANCA -->
+
+  <!-- 📍 PAGINACIÓN (Completamente fuera y separada con my-4) -->
+  {% if is_paginated %}
+  <nav class="my-4 d-flex justify-content-center">
+    <ul class="pagination pagination-sm gap-2 mb-0">
+      {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a
+          class="page-link shadow-sm bg-white"
+          href="?page={{ page_obj.previous_page_number }}"
+          >Anterior</a
+        >
+      </li>
+      {% endif %}
+
+      <li class="page-item disabled">
+        <span class="page-link text-dark fw-medium bg-white shadow-sm border-0">
+          Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+        </span>
+      </li>
+
+      {% if page_obj.has_next %}
+      <li class="page-item">
+        <a
+          class="page-link shadow-sm bg-white"
+          href="?page={{ page_obj.next_page_number }}"
+          >Siguiente</a
+        >
+      </li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
 </div>
 
 <!-- MODAL: AGREGAR CURSO -->
