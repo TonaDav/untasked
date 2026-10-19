@@ -374,7 +374,7 @@
             data-curso="{{ tarea.curso.nombre|default:'Sin curso' }}"
             data-fecha="{{ tarea.fecha_limite|date:'d/m/Y' }}"
             data-prioridad="{{ tarea.get_prioridad_display|default:tarea.prioridad }}"
-            data-subtareas="{{ tarea.subtareas_json|safe }}"
+            data-subtareas='{{ tarea.subtareas_json|default:"[]"|safe }}'
           >
             <!-- Nombre Tarea con Check -->
             <td>
@@ -748,6 +748,7 @@
 <!-- SCRIPTS JAVASCRIPT -->
 <script>
   document.addEventListener("DOMContentLoaded", function () {
+    // 1. Manejo del clic en las filas para abrir el modal de detalle
     var tableBody = document.querySelector(".table-custom tbody");
     var detalleModalElement = document.getElementById("detalleTareaModal");
 
@@ -755,6 +756,7 @@
       var detalleModal = new bootstrap.Modal(detalleModalElement);
 
       tableBody.addEventListener("click", function (event) {
+        // Evitar que el modal se abra al presionar botones de acción o formularios
         if (
           event.target.closest(".btn-delete-task") ||
           event.target.closest("form")
@@ -770,21 +772,38 @@
         var fecha = row.getAttribute("data-fecha");
         var prioridad = row.getAttribute("data-prioridad");
 
-        // Ahora subtareas es una lista de strings: ["Primera subtarea", "Segunda subtarea"]
-        var subtareas = JSON.parse(row.getAttribute("data-subtareas") || "[]");
+        // Lectura de subtareas segura
+        var rawSubtareas = row.getAttribute("data-subtareas");
+        var subtareas = [];
 
+        if (rawSubtareas && rawSubtareas.trim() !== "") {
+          try {
+            subtareas = JSON.parse(rawSubtareas);
+          } catch (e) {
+            console.error(
+              "Error al parsear data-subtareas:",
+              e,
+              "Valor recibido:",
+              rawSubtareas,
+            );
+            subtareas = [];
+          }
+        }
+
+        // Poblar datos generales de la tarea en el modal
         document.getElementById("modalDetalleTitulo").textContent = titulo;
         document.getElementById("modalDetalleCurso").textContent = curso;
         document.getElementById("modalDetalleFecha").textContent = fecha;
         document.getElementById("modalDetallePrioridad").textContent =
           prioridad;
 
+        // Renderizar el contenedor de subtareas
         var subContainer = document.getElementById(
           "modalDetalleSubtareasContainer",
         );
         subContainer.innerHTML = "";
 
-        if (subtareas.length > 0) {
+        if (Array.isArray(subtareas) && subtareas.length > 0) {
           var ul = document.createElement("ul");
           ul.className = "list-unstyled mb-0 d-flex flex-column gap-2";
 
@@ -793,9 +812,9 @@
             li.className =
               "d-flex align-items-center gap-2 text-secondary small";
             li.innerHTML = `
-            <i class="bi bi-dash-circle text-muted"></i>
-            <span>${descripcionSubtarea}</span>
-          `;
+              <i class="bi bi-dash-circle text-muted"></i>
+              <span>${descripcionSubtarea}</span>
+            `;
             ul.appendChild(li);
           });
 
