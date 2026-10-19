@@ -29,7 +29,6 @@ class Tarea(models.Model):
   descripcion = models.CharField(max_length=50)
   fecha_limite = models.DateField(validators=[validate_fecha_limite])
   prioridad = models.CharField(choices=PRIORIDADES, max_length=8, default='BAJA')
-  is_completada = models.BooleanField(default=False)
 
   def __str__(self):
     return f'{self.descripcion}'
@@ -37,7 +36,6 @@ class Tarea(models.Model):
 class Subtarea(models.Model):
   tarea = models.ForeignKey(Tarea, on_delete=models.CASCADE, related_name='subtareas')
   descripcion = models.CharField(max_length=150)
-  is_completada = models.BooleanField(default=False)
 
   def __str__(self):
     return f'{self.descripcion}'
