@@ -374,11 +374,7 @@
             data-curso="{{ tarea.curso.nombre|default:'Sin curso' }}"
             data-fecha="{{ tarea.fecha_limite|date:'d/m/Y' }}"
             data-prioridad="{{ tarea.get_prioridad_display|default:tarea.prioridad }}"
-            data-subtareas='[
-              {% for sub in tarea.subtareas.all %}
-                {"descripcion": "{{ sub.descripcion|escapejs }}", "completada": {{ sub.is_completada|lower }}}{% if not forloop.last %},{% endif %}
-              {% endfor %}
-            ]'
+            data-subtareas="{{ tarea.subtareas_json|safe }}"
           >
             <!-- Nombre Tarea con Check -->
             <td>
@@ -752,7 +748,6 @@
 <!-- SCRIPTS JAVASCRIPT -->
 <script>
   document.addEventListener("DOMContentLoaded", function () {
-    // 1. Manejo del clic en las filas para abrir el modal de detalle
     var tableBody = document.querySelector(".table-custom tbody");
     var detalleModalElement = document.getElementById("detalleTareaModal");
 
@@ -774,6 +769,8 @@
         var curso = row.getAttribute("data-curso");
         var fecha = row.getAttribute("data-fecha");
         var prioridad = row.getAttribute("data-prioridad");
+
+        // Ahora subtareas es una lista de strings: ["Primera subtarea", "Segunda subtarea"]
         var subtareas = JSON.parse(row.getAttribute("data-subtareas") || "[]");
 
         document.getElementById("modalDetalleTitulo").textContent = titulo;
@@ -791,14 +788,14 @@
           var ul = document.createElement("ul");
           ul.className = "list-unstyled mb-0 d-flex flex-column gap-2";
 
-          subtareas.forEach(function (sub) {
+          subtareas.forEach(function (descripcionSubtarea) {
             var li = document.createElement("li");
             li.className =
               "d-flex align-items-center gap-2 text-secondary small";
             li.innerHTML = `
-              <i class="bi ${sub.completada ? "bi-check-circle-fill text-success" : "bi-circle text-muted"}"></i>
-              <span class="${sub.completada ? "text-decoration-line-through text-muted" : ""}">${sub.descripcion}</span>
-            `;
+            <i class="bi bi-dash-circle text-muted"></i>
+            <span>${descripcionSubtarea}</span>
+          `;
             ul.appendChild(li);
           });
 

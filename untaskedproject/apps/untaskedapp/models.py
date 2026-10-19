@@ -1,3 +1,4 @@
+import json
 from datetime import date
 from django.db import models
 from django.conf import settings
@@ -32,6 +33,11 @@ class Tarea(models.Model):
 
   def __str__(self):
     return f'{self.descripcion}'
+
+  def subtareas_json(self):
+        """Genera un JSON con la lista de descripciones de sus subtareas."""
+        lista_subtareas = [sub.descripcion for sub in self.subtareas.all()]
+        return json.dumps(lista_subtareas)
 
 class Subtarea(models.Model):
   tarea = models.ForeignKey(Tarea, on_delete=models.CASCADE, related_name='subtareas')

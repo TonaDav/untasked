@@ -159,5 +159,4 @@ class TareaDeleteView(LoginRequiredMixin, View):
       messages.success(request, '¡Tarea completada!')
 
     tarea.delete()
-    messages.success(request, '¡Tarea completada!')
     return redirect('mis_tareas')
