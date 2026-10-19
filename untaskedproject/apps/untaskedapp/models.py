@@ -33,6 +33,9 @@ class Tarea(models.Model):
   def __str__(self):
     return f'{self.descripcion}'
 
+  def obtener_subtareas_list(self):
+    return list(self.subtareas.values('descripcion', 'completada'))
+
 class Subtarea(models.Model):
   tarea = models.ForeignKey(Tarea, on_delete=models.CASCADE, related_name='subtareas')
   descripcion = models.CharField(max_length=150)
