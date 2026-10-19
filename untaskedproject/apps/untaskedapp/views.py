@@ -152,6 +152,12 @@ class TareaDeleteView(LoginRequiredMixin, View):
   def post(self, request, pk):
     # Garantizamos que la tarea pertenezca a un curso del usuario autenticado.
     tarea = get_object_or_404(Tarea, pk=pk, curso__usuario=self.request.user)
+
+    action = request.POST.get('action')
+
+    if action == 'complete':
+      messages.success(request, '¡Tarea completada!')
+
     tarea.delete()
     messages.success(request, '¡Tarea completada!')
     return redirect('mis_tareas')
