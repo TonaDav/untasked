@@ -370,16 +370,16 @@
           {% for tarea in tareas %}
           <tr
             class="task-row-clickable"
-            data-tarea-id="{{ tarea.pk }}"
             data-titulo="{{ tarea.descripcion }}"
             data-curso="{{ tarea.curso.nombre|default:'Sin curso' }}"
             data-fecha="{{ tarea.fecha_limite|date:'d/m/Y' }}"
             data-prioridad="{{ tarea.get_prioridad_display|default:tarea.prioridad }}"
+            data-subtareas='[
+              {% for sub in tarea.subtareas.all %}
+                {"descripcion": "{{ sub.descripcion|escapejs }}", "completada": {{ sub.is_completada|lower }}}{% if not forloop.last %},{% endif %}
+              {% endfor %}
+            ]'
           >
-            <!-- Genera un script JSON seguro e inmune a errores de sintaxis -->
-            {{
-            tarea.obtener_subtareas_list|json_script:tarea.pk|add:"-subtareas-data"
-            }}
             <!-- Nombre Tarea con Check -->
             <td>
               <div class="d-flex align-items-center">
@@ -432,6 +432,7 @@
                 {% csrf_token %}
                 <button
                   type="submit"
+                  value="complete"
                   class="btn-delete-task"
                   title="Eliminar tarea"
                 >
@@ -773,22 +774,7 @@
         var curso = row.getAttribute("data-curso");
         var fecha = row.getAttribute("data-fecha");
         var prioridad = row.getAttribute("data-prioridad");
-
-        // Obtener el ID de la tarea para ubicar su tag json_script
-        var tareaId = row.getAttribute("data-tarea-id");
-        var subtareas = [];
-
-        // Buscar el bloque de script generado por json_script
-        var scriptElement = document.getElementById(
-          tareaId + "-subtareas-data",
-        );
-        if (scriptElement) {
-          try {
-            subtareas = JSON.parse(scriptElement.textContent);
-          } catch (e) {
-            console.error("Error al parsear el JSON de subtareas:", e);
-          }
-        }
+        var subtareas = JSON.parse(row.getAttribute("data-subtareas") || "[]");
 
         document.getElementById("modalDetalleTitulo").textContent = titulo;
         document.getElementById("modalDetalleCurso").textContent = curso;
@@ -810,9 +796,9 @@
             li.className =
               "d-flex align-items-center gap-2 text-secondary small";
             li.innerHTML = `
-            <i class="bi ${sub.completada ? "bi-check-circle-fill text-success" : "bi-circle text-muted"}"></i>
-            <span class="${sub.completada ? "text-decoration-line-through text-muted" : ""}">${sub.descripcion}</span>
-          `;
+              <i class="bi ${sub.completada ? "bi-check-circle-fill text-success" : "bi-circle text-muted"}"></i>
+              <span class="${sub.completada ? "text-decoration-line-through text-muted" : ""}">${sub.descripcion}</span>
+            `;
             ul.appendChild(li);
           });
 
