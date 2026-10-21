@@ -74,3 +74,9 @@ class LoginUsuarioForm(AuthenticationForm):
       'placeholder':'*****'
     })
   )
+
+  def clean_username(self):
+    username = self.cleaned_data.get('username')
+    if username:
+      return username.strip().lower()
+    return username
