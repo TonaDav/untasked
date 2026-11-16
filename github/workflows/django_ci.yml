@@ -1,0 +1,55 @@
+name: Django CI - Untasked
+
+on:
+  push:
+    branches: ["main", "develop"]
+  pull_request:
+    branches: ["main", "develop"]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    # Aquí levantamos un contenedor real de PostgreSQL para las pruebas CI
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: ci_user
+          POSTGRES_PASSWORD: ci_password
+          POSTGRES_DB: untasked_ci_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: 1. Descargar código del repositorio
+        uses: actions/checkout@v4
+
+      - name: 2. Configurar Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: "pip"
+          cache-dependency-path: "untaskedproject/requirements.txt"
+
+      - name: 3. Instalar dependencias del proyecto
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r untaskedproject/requirements.txt
+
+      - name: 4. Verificar integridad, migraciones y pruebas de Django
+        env:
+          SECRET_KEY: "django-insecure-ci-pipeline-secret-key"
+          DEBUG: "True"
+          DATABASE_URL: "postgres://ci_user:ci_password@localhost:5432/untasked_ci_db"
+        run: |
+          cd untaskedproject
+          python manage.py check
+          python manage.py makemigrations --check --dry-run
+          python manage.py migrate
+          python manage.py test
